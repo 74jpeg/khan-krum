@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Khan Krum the Fearsome</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3efe6;--card:#fffdf8;--ink:#1d2a2e;--muted:#5d6b6f;--line:#d5cfc0;--accent:#ff5724;--good:#2e7d32;--bad:#b3402a;--stage:#1d2a2e;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141b1d;--card:#1e282b;--ink:#eee9dc;--muted:#9aa8ab;--line:#334044;--accent:#ff5724;--good:#7bc67e;--bad:#ef8a73;--stage:#0b1011;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#141b1d;--card:#1e282b;--ink:#eee9dc;--muted:#9aa8ab;--line:#334044;--accent:#ff5724;--good:#7bc67e;--bad:#ef8a73;--stage:#0b1011;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.5}
+main{max-width:1000px;margin:0 auto;padding:clamp(20px,5vw,56px) clamp(16px,4vw,32px) 48px}
+h1{font-size:clamp(2rem,6vw,3.2rem);font-weight:800;letter-spacing:-.03em;line-height:1.05;margin:0 0 10px}
+.lede{color:var(--muted);max-width:56ch;margin:0 0 22px}
+#list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
+.card{display:grid;grid-template-columns:40px 280px 1fr auto;gap:20px;align-items:center;background:var(--card);border:2px solid var(--line);border-radius:6px;padding:12px 16px 12px 10px;transition:border-color .2s,background .2s}
+.card.dragging{opacity:.45}
+.card.ok{border-color:var(--good)}
+.card.no{border-color:var(--bad)}
+.grip{cursor:grab;color:var(--muted);text-align:center;font-size:1.3rem;user-select:none;touch-action:none}
+.clip{position:relative;aspect-ratio:16/10;background:var(--stage);border-radius:3px;overflow:hidden;
+border-left:8px dotted var(--line);border-right:8px dotted var(--line)}
+.clip video{width:100%;height:100%;object-fit:cover;display:block}
+.ph{position:absolute;inset:0;display:grid;place-items:center;font-size:2.4rem;color:#fff}
+.ph span{animation:bob 2.4s ease-in-out infinite}
+.ph i{position:absolute;left:0;bottom:0;height:5px;background:var(--accent);width:0;animation:fill 4s linear infinite}
+@keyframes bob{50%{transform:translateY(-8px) scale(1.08)}}
+@keyframes fill{to{width:100%}}
+.txt{font-weight:600;font-size:1.05rem;line-height:1.55}
+.file{display:block;margin-top:4px;font-size:.78rem;color:var(--muted);font-weight:400;cursor:pointer;text-decoration:underline}
+.file input{display:none}
+.mv{display:flex;flex-direction:column;gap:4px}
+button{font:inherit;cursor:pointer}
+.mv button{width:34px;height:30px;border:1.5px solid var(--line);background:transparent;color:var(--ink);border-radius:4px}
+.mv button:hover{border-color:var(--accent)}
+button:focus-visible,.file:focus-within{outline:3px solid var(--accent);outline-offset:2px}
+.bar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:22px}
+.go{background:var(--accent);color:var(--stage);border:0;border-radius:4px;padding:12px 22px;font-weight:800;font-size:1rem}
+.alt{background:transparent;color:var(--ink);border:2px solid var(--line);border-radius:4px;padding:10px 18px;font-weight:600}
+#msg{font-weight:600;min-height:1.5em}
+#win{display:none;margin-top:22px;padding:20px;border:2px solid var(--good);border-radius:6px;background:var(--card)}
+#win h2{margin:0 0 6px;font-size:1.6rem}
+.fs{position:absolute;top:6px;right:6px;z-index:2;width:30px;height:30px;border:0;border-radius:4px;background:rgba(0,0,0,.6);color:#fff;font-size:1rem;line-height:1}
+.fs:hover{background:var(--accent)}
+#ov{display:none;position:fixed;inset:0;z-index:50;background:#000;align-items:center;justify-content:center}
+#stage{position:relative;width:min(96vw,calc(88vh*1.6));aspect-ratio:16/10;background:var(--stage)}
+#stage video{width:100%;height:100%;object-fit:contain;display:block}
+#stage .ph{font-size:7rem}
+#closefs{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));right:14px;border:0;border-radius:4px;background:#fff;color:#000;padding:8px 16px;font-weight:800}
+[hidden]{display:none!important}
+#start{display:flex;flex-direction:column;justify-content:center;max-width:640px;min-height:min(70vh,640px)}
+#start .go{align-self:flex-start;font-size:1.15rem;padding:16px 38px;margin-top:8px}
+@media (max-width:700px){
+#start{min-height:60vh}#start .go{align-self:stretch}
+#list{gap:8px}
+.card{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"clip grip" "clip mv" "txt txt";gap:6px 10px;padding:8px}
+.clip{grid-area:clip;align-self:start;border-left-width:5px;border-right-width:5px}
+.txt{grid-area:txt;font-size:.92rem;line-height:1.45}
+.grip{grid-area:grip;align-self:end;display:grid;place-items:center;height:40px;border:1.5px dashed var(--line);border-radius:6px;font-size:1.4rem}
+.mv{grid-area:mv;align-self:start;flex-direction:row;gap:8px}
+.mv button{width:46px;height:44px;font-size:1rem}
+.fs{width:34px;height:34px}
+.bar{position:sticky;bottom:0;z-index:5;background:var(--bg);margin:18px -16px 0;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));border-top:2px solid var(--line);display:grid;grid-template-columns:1fr 1fr;gap:10px}
+#check{grid-column:1/3;padding:15px}
+#msg{grid-column:1/3;min-height:0}
+.alt{padding:12px 10px}
+}
+@media (prefers-reduced-motion:reduce){.ph span,.ph i{animation:none}.ph i{width:60%}}
+</style>
+</head>
+<body>
+<main>
+<section id="start">
+<h1>Krum’s khanate</h1>
+<p class="lede">During khan Krum's reign, the First Bulgarian Empire doubled in size - reaching regions from the middle Dunabe to the Dneiper, and from Odrin to the Tatra Mt. He forced 3 byzantine emperors to give up the throne during his reign.</p>
+<p class="lede" style="margin-top:-10px">How to play: watch the clips, then drag the cards (or use the arrows) into the order the events happened, and press Check order. First few winners get a prize!</p>
+<button class="go" id="startbtn" type="button">Start</button>
+</section>
+<section id="game" hidden>
+<ol id="list"></ol>
+<div class="bar">
+<button class="go" id="check">Check order</button>
+<button class="alt" id="shuffle">Shuffle</button>
+<button class="alt" id="back" type="button">Back to start</button>
+<span id="msg" role="status" aria-live="polite"></span>
+</div>
+<div id="win" role="alert"><h2>Perfect cut!</h2><p>Every clip is in the right place. Nicely done.</p><button class="alt" id="again">Play again</button></div>
+</section>
+</main>
+<div id="ov" role="dialog" aria-modal="true" aria-label="Full screen clip"><div id="stage"></div><button id="closefs" type="button">Close</button></div>
+<script>
+// Edit the steps below. List them in the CORRECT order.
+// To use real videos, put a file name or URL in "video" (e.g. "clips/boil.mp4"),
+// or click "Use my own clip" under any card while playing.
+const STEPS=[
+{text:"In 807, the bulgarian forces defeated the byzantine army in Struma valley under Krum's command. In two years' time, the khan had besieged Serdica, today's Sofia, resulting in 6000 byzantine casualties. In response, Byzantine's (then) emperor Nickephorous I tried to retake the territory, but failed.",video:"clip1.mp4",emoji:"⚔️"},
+{text:"Only a few years later, in 811, Nickephorous took a massive expedition against Bulgaria. Krum tried to negotiate, but Nickephorous was determined, and a little over a week later managed to take siege over Pliska. He turned his army on the population, pillaging and burning the city, and commanding his soldiers to brutally slaughter the population, including women and children.",video:"clip2.mp4",emoji:"🔥"},
+{text:"In response to Nickephorous' brutality, Krum mobilised as many soldiers as he could, giving even women and peasants weapons to assemble a bigger army. His plan was to trap Nickephorous and his people as they returned to Constantinople. At the Varbitsa Pass Nickephorous and his people were trapped by the bulgarian army and the byzantines were wiped out.",video:"clip3.mp4",emoji:"🏔️"},
+{text:"The campaign ended and Khan Krum had Nickephorous' head severed and displayed for several days as a showcase to surrounding tribes. After that he had the skull lined with silver and turned into a drinking cup, a ritual suit to the nomadic cultures of the Eurasian Steppe. Drinking from it signified absorbing the fallen enemy's life essence, wisdom and millitary power. It earned him the nickname \"the Fearsome\".",video:"clip4.mp4",emoji:"🏺"},
+{text:"Krum's victories continued when Nickephorous' son in law, Micheal I Rangabe, mobilised troops from the entire Byzantine empire hoping for decisive victory. He lined his army against the bulgarians, but neither side initiated attack for two weeks. When the Battle of Versinikia finally commenced, the byzantines were immidietly turned to flight. The khan advanced on Byzantine's capital Constantinople, where all but one fortresses surrendered. The one left was besieged, and Micheal I was forced to abdicate.",video:"clip5.mp4",emoji:"🛡️"},
+{text:"Leo V the Armenian, successor of Micheal I, started peace negotiations in an attempt to trick and assassinate Krum. The khan guessed what was happening and escaped. Enraged by the attempt, he ordered the looting and burning of the churches and monasteries of Eastern Thrace, which caused the fall of Adrianople and the capture of 10,000 roman soldiers.",video:"clip6.mp4",emoji:"⛪"}
+];
+const list=document.getElementById("list"),msg=document.getElementById("msg"),win=document.getElementById("win");
+let order=[];
+function shuffled(){let a=STEPS.map((_,i)=>i);do{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}}while(a.every((v,i)=>v===i));return a}
+function placeholder(s){const d=document.createElement("div");d.className="ph";d.innerHTML="<span>"+s.emoji+"</span><i></i>";return d}
+function mount(clip,s,src){clip.querySelectorAll("video,.ph").forEach(n=>n.remove());
+if(!src){clip.appendChild(placeholder(s));return}
+const v=document.createElement("video");v.src=src;v.controls=true;v.muted=true;v.loop=true;v.playsInline=true;v.preload="metadata";
+v.onerror=()=>{v.remove();clip.appendChild(placeholder(s))};clip.appendChild(v)}
+function build(){list.innerHTML="";
+order.forEach(id=>{const s=STEPS[id];const li=document.createElement("li");li.className="card";li.dataset.id=id;li.draggable=true;
+li.innerHTML='<div class="grip" aria-hidden="true">⠿</div><div class="clip"></div><div class="txt"></div><div class="mv"><button type="button" aria-label="Move up">▲</button><button type="button" aria-label="Move down">▼</button></div>';
+li.querySelector(".txt").textContent=s.text;
+const clip=li.querySelector(".clip");mount(clip,s,s.video);
+const fs=document.createElement("button");fs.type="button";fs.className="fs";fs.textContent="\u2922";fs.setAttribute("aria-label","Watch full screen");fs.onclick=()=>openFs(clip);clip.appendChild(fs);
+const lab=document.createElement("label");lab.className="file";lab.innerHTML='Use my own clip<input type="file" accept="video/*">';
+lab.querySelector("input").onchange=e=>{const f=e.target.files[0];if(f)mount(clip,s,URL.createObjectURL(f))};
+li.querySelector(".txt").appendChild(lab);
+const grip=li.querySelector(".grip");
+grip.addEventListener("pointerdown",e=>{if(e.pointerType==="mouse")return;e.preventDefault();li.draggable=false;li.classList.add("dragging");
+const mv=ev=>{reorder(li,ev.clientY);if(ev.clientY<70)window.scrollBy(0,-14);else if(ev.clientY>window.innerHeight-70)window.scrollBy(0,14)};
+const up=()=>{document.removeEventListener("pointermove",mv);document.removeEventListener("pointerup",up);document.removeEventListener("pointercancel",up);li.classList.remove("dragging");li.draggable=true;sync()};
+document.addEventListener("pointermove",mv);document.addEventListener("pointerup",up);document.addEventListener("pointercancel",up)});
+const [up,down]=li.querySelectorAll(".mv button");
+up.onclick=()=>move(li,-1);down.onclick=()=>move(li,1);
+li.addEventListener("dragstart",()=>li.classList.add("dragging"));
+li.addEventListener("dragend",()=>{li.classList.remove("dragging");sync()});
+list.appendChild(li)})}
+function sync(){order=[...list.children].map(li=>+li.dataset.id);clearMarks()}
+function clearMarks(){[...list.children].forEach(li=>li.classList.remove("ok","no"));msg.textContent="";win.style.display="none"}
+function move(li,d){const t=d<0?li.previousElementSibling:li.nextElementSibling;if(!t)return;
+d<0?list.insertBefore(li,t):list.insertBefore(t,li);sync();const b=li.querySelectorAll(".mv button")[d<0?0:1];b&&b.focus()}
+function reorder(cur,y){const after=[...list.children].filter(c=>c!==cur).find(c=>{const r=c.getBoundingClientRect();return y<r.top+r.height/2});
+if(after?after===cur.nextElementSibling:!cur.nextElementSibling)return;after?list.insertBefore(cur,after):list.appendChild(cur)}
+list.addEventListener("dragover",e=>{e.preventDefault();const cur=list.querySelector(".dragging");if(!cur)return;reorder(cur,e.clientY)});
+document.getElementById("check").onclick=()=>{let right=0;
+[...list.children].forEach((li,i)=>{const ok=+li.dataset.id===i;if(ok)right++;li.classList.toggle("ok",ok);li.classList.toggle("no",!ok)});
+if(right===STEPS.length){msg.textContent="";win.style.display="block";win.scrollIntoView({behavior:"smooth",block:"nearest"})}
+else{win.style.display="none";msg.textContent=right+" of "+STEPS.length+" cards are in the right place."}};
+const ov=document.getElementById("ov"),stage=document.getElementById("stage");let openClip=null,openMedia=null;
+function openFs(clip){const m=clip.querySelector("video,.ph");if(!m)return;openClip=clip;openMedia=m;stage.appendChild(m);ov.style.display="flex";
+if(ov.requestFullscreen)ov.requestFullscreen().catch(()=>{});document.getElementById("closefs").focus()}
+function closeFs(){if(!openClip)return;if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});openClip.insertBefore(openMedia,openClip.firstChild);ov.style.display="none";openClip=openMedia=null}
+document.getElementById("closefs").onclick=closeFs;
+ov.addEventListener("click",e=>{if(e.target===ov)closeFs()});
+document.addEventListener("keydown",e=>{if(e.key==="Escape")closeFs()});
+document.addEventListener("fullscreenchange",()=>{if(!document.fullscreenElement&&openClip)closeFs()});
+document.getElementById("startbtn").onclick=()=>{document.getElementById("start").hidden=true;document.getElementById("game").hidden=false;window.scrollTo(0,0)};
+document.getElementById("back").onclick=()=>{closeFs();restart();document.getElementById("game").hidden=true;document.getElementById("start").hidden=false;window.scrollTo(0,0)};
+function restart(){order=shuffled();build();clearMarks()}
+document.getElementById("shuffle").onclick=restart;
+document.getElementById("again").onclick=restart;
+restart();
+</script>
+</body>
+</html>
